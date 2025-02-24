@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
 
-import { filtersFetching, filtersFetched, filtersFetchingError, activeFilterChanged } from '../../actions';
+import { activeFilterChanged, fetchFilters } from './heroesFiltersSlice';
 import Spinner from '../spinner/Spinner';
 
 // Задача для этого компонента:
@@ -13,17 +13,14 @@ import Spinner from '../spinner/Spinner';
 
 const HeroesFilters = () => {
 
-    const {filters, filtersLoadingStatus, activeFilter} = useSelector(state => state); // Получаем фильтры из store
+    const {filters, filtersLoadingStatus, activeFilter} = useSelector(state => state.filters); // Получаем фильтры из store
     const dispatch = useDispatch(); // useDispatch для отправки нового персонажа в store
     const {request} = useHttp(); // Хук для отправки запросов на сервер
 
     // Запрос на сервер для получения фильтров и последовательной смены состояния
     useEffect(() => {
-        dispatch(filtersFetching()); // Ставим статус загрузки
-        request("http://localhost:3001/filters") // Запрос на сервер
-            .then(data => dispatch(filtersFetched(data))) // Если все ок, то отправляем данные в store
-            .catch(() => dispatch(filtersFetchingError())) // Если ошибка, то ставим статус ошибки
-
+        dispatch(fetchFilters(request)); // Ставим статус загрузки
+        
         // eslint-disable-next-line
     }, []);
 

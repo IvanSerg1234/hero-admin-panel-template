@@ -1,10 +1,22 @@
 {
   "heroes": [
     {
-      "id": "7afefcb2-076f-4701-ae62-ba0ac1a0dba6",
-      "name": "Богдан",
-      "description": "ЖОСКИ ИНФЛЮЕНСЕР",
+      "id": "650d1e28-c142-4205-8e6b-0b9efd7761a3",
+      "name": "Первый герой",
+      "description": "Первый герой в рейтинге!",
       "element": "fire"
+    },
+    {
+      "id": "f1c46878-23ad-4755-a4aa-5c5f3f28280f",
+      "name": "Неизвестный герой",
+      "description": "Скрывающийся в тени",
+      "element": "wind"
+    },
+    {
+      "id": "42b83576-059c-4a3d-9fc4-69ded5785106",
+      "name": "Морской герой ",
+      "description": "Как аквамен, но не из DC",
+      "element": "water"
     }
   ],
   "filters": [

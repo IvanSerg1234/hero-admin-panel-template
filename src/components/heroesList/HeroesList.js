@@ -2,8 +2,9 @@ import {useHttp} from '../../hooks/http.hook';
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
+import {createSelector} from '@reduxjs/toolkit';
 
-import { heroesFetching, heroesFetched, heroesFetchingError, heroDeleted } from '../../actions';
+import {heroDeleted, fetchHeroes} from './heroesSlice';
 import HeroesListItem from "../heroesListItem/HeroesListItem";
 import Spinner from '../spinner/Spinner';
 
@@ -15,15 +16,35 @@ import './heroesList.scss';
 // Удаление идет и с json файла при помощи метода DELETE
 
 const HeroesList = () => {
-    const {filteredHeroes, heroesLoadingStatus} = useSelector(state => state); // Получаем фильтры из store
+
+    const filteredHeroesSelector = createSelector( // Создаем селектор для фильтрации героев)
+        (state) => state.filters.activeFilter,
+        (state) => state.heroes.heroes,
+        (filter, heroes) => {
+            if (filter === 'all') {
+                return heroes;
+            } else {
+                return heroes.filter(item => item.element === filter);
+            }
+        }
+    );
+
+    // const filteredHeroes = useSelector(state => { // используя useSelector формируем нужные данные на основании state
+    //     if (state.filters.activeFilter === 'all') {
+    //         console.log('render');
+    //         return state.heroes.heroes;
+    //     } else {
+    //         return state.heroes.heroes.filter(item => item.element === state.filters.activeFilter);
+    //     }
+    // })
+
+    const filteredHeroes = useSelector(filteredHeroesSelector);
+    const heroesLoadingStatus = useSelector(state => state.heroes.heroesLoadingStatus); // Получаем фильтры из store
     const dispatch = useDispatch(); // useDispatch для отправки нового персонажа в store
     const {request} = useHttp(); // Хук для отправки запросов на сервер
 
     useEffect(() => { // Запрос на сервер для получения персонажей и последовательной смены состояния
-        dispatch(heroesFetching()); // Ставим статус загрузки
-        request("http://localhost:3001/heroes") // Запрос на сервер
-            .then(data => dispatch(heroesFetched(data))) // Если все ок, то отправляем данные в store
-            .catch(() => dispatch(heroesFetchingError())) // Если ошибка, то ставим статус ошибки
+        dispatch(fetchHeroes()) 
 
         // eslint-disable-next-line
     }, []);
