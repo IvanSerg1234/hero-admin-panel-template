@@ -1,9 +1,9 @@
-import {useHttp} from '../../hooks/http.hook';
-import { useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import {useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
 
-import {heroDeleted, fetchHeroes, filteredHeroesSelector} from './heroesSlice';
+import {useGetHeroesQuery, useDeleteHeroMutation} from '../../api/apiSlice';
+
 import HeroesListItem from "../heroesListItem/HeroesListItem";
 import Spinner from '../spinner/Spinner';
 
@@ -16,43 +16,35 @@ import './heroesList.scss';
 
 const HeroesList = () => {
 
-    
+    const { // Обьект - формирующийся из хука useGetHeroesQuery
+        data: heroes = [],
+        isLoading,
+        isError,
+    } = useGetHeroesQuery();
 
-    // const filteredHeroes = useSelector(state => { // используя useSelector формируем нужные данные на основании state
-    //     if (state.filters.activeFilter === 'all') {
-    //         console.log('render');
-    //         return state.heroes.heroes;
-    //     } else {
-    //         return state.heroes.heroes.filter(item => item.element === state.filters.activeFilter);
-    //     }
-    // })
+    const [deleteHero] = useDeleteHeroMutation();
 
-    const filteredHeroes = useSelector(filteredHeroesSelector);
-    const heroesLoadingStatus = useSelector(state => state.heroes.heroesLoadingStatus); // Получаем фильтры из store
-    const dispatch = useDispatch(); // useDispatch для отправки нового персонажа в store
-    const {request} = useHttp(); // Хук для отправки запросов на сервер
+    const activeFilter = useSelector(state => state.filters.activeFilter); // Получаем активный фильтр из store
 
-    useEffect(() => { // Запрос на сервер для получения персонажей и последовательной смены состояния
-        dispatch(fetchHeroes()) 
+    const filteredHeroes = useMemo(() => {
+        const filteredHeroes = heroes.slice(); // Создаем копию массива героев
+        
+        if (activeFilter === 'all') {
+            return filteredHeroes;
+        } else {
+            return filteredHeroes.filter(item => item.element === activeFilter);
+        }
+        // eslint-disable-next-line
+    }, [heroes, activeFilter])
 
+    const onDelete = useCallback((id) => {
+        deleteHero(id);
         // eslint-disable-next-line
     }, []);
 
-    // Функция берет id и по нему удаляет ненужного персонажа из store
-    // ТОЛЬКО если запрос на удаление прошел успешно
-    // Отслеживайте цепочку действий actions => reducers
-    const onDelete = useCallback((id) => { // Удаление персонажа по его id (ОБЯЗАТЕЛЬНО useCallback для корректной передачи дальше по иерархии)
-        // Удаление персонажа по его id
-        request(`http://localhost:3001/heroes/${id}`, "DELETE") // Запрос на сервер
-            .then(data => console.log(data, 'Deleted')) // Если все ок, то выводим в консоль
-            .then(dispatch(heroDeleted(id))) // Удаляем персонажа из store
-            .catch(err => console.log(err)); // Если ошибка, то выводим в консоль
-        // eslint-disable-next-line  
-    }, [request]);
-
-    if (heroesLoadingStatus === "loading") { // Если статус загрузки, то выводим загрузку
+    if (isLoading) { // Если статус загрузки, то выводим загрузку
         return <Spinner/>;
-    } else if (heroesLoadingStatus === "error") { // Если ошибка, то выводим ошибку
+    } else if (isError) { // Если ошибка, то выводим ошибку
         return <h5 className="text-center mt-5">Ошибка загрузки</h5>
     }
 
@@ -67,13 +59,13 @@ const HeroesList = () => {
             )
         }
 
-        return arr.map(({id, ...props}) => { // Проходимся по героям
-            return ( // Возвращаем элемент списка
+        return arr.map(({id, ...props}) => {
+            return (
                 <CSSTransition 
                     key={id}
                     timeout={500}
                     classNames="hero">
-                    <HeroesListItem  {...props} onDelete={() => onDelete(id)}/> 
+                    <HeroesListItem  {...props} onDelete={() => onDelete(id)}/>
                 </CSSTransition>
             )
         })

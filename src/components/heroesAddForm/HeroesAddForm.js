@@ -15,13 +15,15 @@ import { v4 as uuidv4 } from 'uuid';
 import store from '../../store';
 
 import {selectAll} from '../heroesFilters/heroesFiltersSlice';
-import { heroCreated } from '../heroesList/heroesSlice';
+import {useCreateHeroMutation} from '../../api/apiSlice';
 
 const HeroesAddForm = () => {
     
     const [heroName, setHeroName] = useState(''); // Состояние для имени
     const [heroDescr, setHeroDescr] = useState(''); // Состояние для описания
     const [heroElement, setHeroElement] = useState(''); // Состояние для элемента
+
+    const [createHero, {isLoading}] = useCreateHeroMutation();
 
     const {filtersLoadingStatus} = useSelector(state => state.filters); // Получаем фильтры из store
     const filters = selectAll(store.getState()); // Получаем фильтры из store
@@ -38,10 +40,7 @@ const HeroesAddForm = () => {
             element: heroElement // Элемент персонажа
         }
 
-        request("http://localhost:3001/heroes", "POST", JSON.stringify(newHero)) // Отправляем нового персонажа на сервер
-            .then(res => console.log(res, 'Отправка успешна')) // Если все ок, то выводим в консоль
-            .then(dispatch(heroCreated(newHero))) // Отправляем нового персонажа в store
-            .catch(err => console.log(err)); // Если ошибка, то выводим в консоль
+        createHero(newHero).unwrap(); // Отправляем нового персонажа на сервер
 
         setHeroName(''); // Очищаем состояние имени
         setHeroDescr(''); // Очищаем состояние описания

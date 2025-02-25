@@ -1,6 +1,6 @@
 import { configureStore} from '@reduxjs/toolkit';
-import heroes from '../components/heroesList/heroesSlice';
 import filters from '../components/heroesFilters/heroesFiltersSlice';
+import {apiSlice}  from '../api/apiSlice';
 
 const stringMiddleware = () => (next) => (action) => { // Сразу возвращаем новый dispatch с проверкой на строку
     if (typeof action === 'string') {
@@ -16,8 +16,11 @@ const stringMiddleware = () => (next) => (action) => { // Сразу возвр�
 //                 );
 
 const store = configureStore({
-    reducer: {heroes, filters},
-    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(stringMiddleware),
+    reducer: {filters, 
+                [apiSlice.reducerPath]: apiSlice.reducer}, // apiSlice.reducerPath - это ключ, apiSlice.reducer - это значение
+    middleware: getDefaultMiddleware => 
+        getDefaultMiddleware()
+            .concat(stringMiddleware, apiSlice.middleware),
     devTools: process.env.NODE_ENV !== 'production'
 
 })
