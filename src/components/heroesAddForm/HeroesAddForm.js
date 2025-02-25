@@ -12,7 +12,9 @@ import {useHttp} from '../../hooks/http.hook';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
+import store from '../../store';
 
+import {selectAll} from '../heroesFilters/heroesFiltersSlice';
 import { heroCreated } from '../heroesList/heroesSlice';
 
 const HeroesAddForm = () => {
@@ -21,7 +23,8 @@ const HeroesAddForm = () => {
     const [heroDescr, setHeroDescr] = useState(''); // Состояние для описания
     const [heroElement, setHeroElement] = useState(''); // Состояние для элемента
 
-    const {filters, filtersLoadingStatus} = useSelector(state => state.filters); // Получаем фильтры из store
+    const {filtersLoadingStatus} = useSelector(state => state.filters); // Получаем фильтры из store
+    const filters = selectAll(store.getState()); // Получаем фильтры из store
     const dispatch = useDispatch(); // useDispatch для отправки нового персонажа в store
     const {request} = useHttp(); // Хук для отправки запросов на сервер
 

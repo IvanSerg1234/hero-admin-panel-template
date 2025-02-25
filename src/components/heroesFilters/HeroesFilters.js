@@ -2,8 +2,9 @@ import {useHttp} from '../../hooks/http.hook';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
+import store from '../../store';
 
-import { activeFilterChanged, fetchFilters } from './heroesFiltersSlice';
+import { activeFilterChanged, fetchFilters, selectAll } from './heroesFiltersSlice';
 import Spinner from '../spinner/Spinner';
 
 // Задача для этого компонента:
@@ -13,7 +14,8 @@ import Spinner from '../spinner/Spinner';
 
 const HeroesFilters = () => {
 
-    const {filters, filtersLoadingStatus, activeFilter} = useSelector(state => state.filters); // Получаем фильтры из store
+    const { filtersLoadingStatus, activeFilter} = useSelector(state => state.filters); // Получаем фильтры из store
+    const filters = selectAll(store.getState());
     const dispatch = useDispatch(); // useDispatch для отправки нового персонажа в store
     const {request} = useHttp(); // Хук для отправки запросов на сервер
 
